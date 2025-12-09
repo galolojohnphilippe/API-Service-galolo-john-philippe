@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Explorer | Animal Data Hub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ========== GLOBAL RESET & VARIABLES ========== */
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #8b5cf6;
+      --secondary: #10b981;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+      --surface: #ffffff;
+      --background: #f8fafc;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --radius: 12px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dark-mode {
+      --primary: #818cf8;
+      --primary-dark: #6366f1;
+      --primary-light: #a5b4fc;
+      --surface: #1e293b;
+      --background: #0f172a;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border: #334155;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--background) 0%, #f1f5f9 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      transition: var(--transition);
+    }
+
+    .dark-mode body {
+      background: linear-gradient(135deg, var(--background) 0%, #1e293b 100%);
+    }
+
+    /* ========== LAYOUT & CONTAINERS ========== */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      width: 280px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .logo-text {
+      font-weight: 700;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-section {
+      margin-bottom: 2rem;
+    }
+
+    .nav-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      border-radius: var(--radius);
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: var(--transition);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(99, 102, 241, 0.08);
+      color: var(--primary);
+    }
+
+    .nav-item.active {
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .nav-item i {
+      width: 20px;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    /* ========== MAIN CONTENT ========== */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .theme-toggle {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-secondary);
+    }
+
+    .theme-toggle:hover {
+      background: rgba(99, 102, 241, 0.08);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .content-area {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    /* ========== DASHBOARD CARDS ========== */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .dashboard-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      transition: var(--transition);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+
+    .card-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .dashboard-card h3 {
+      color: var(--text-primary);
+      margin-bottom: 0.8rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .dashboard-card p {
+      color: var(--text-secondary);
+      margin-bottom: 1.2rem;
+      font-size: 0.95rem;
+    }
+
+    .api-badge {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--secondary);
+    }
+
+    .api-badge.key-required {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent);
+    }
+
+    /* ========== API SECTION STYLES ========== */
+    .api-section {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+      border: 1px solid var(--border);
+      display: none;
+    }
+
+    .api-section.active {
+      display: block;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .section-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      padding: 0.5rem 1.25rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      letter-spacing: 0.5px;
+    }
+
+    .section-header h2 {
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .section-description {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ========== FORM CONTROLS ========== */
+    .input-group {
+      display: flex;
+      gap: 12px;
+      margin: 1.5rem 0;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      transition: var(--transition);
+      background: var(--surface);
+      color: var(--text-primary);
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, var(--secondary), #0ca678);
+    }
+
+    .btn-secondary:hover {
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+    }
+
+    /* ========== API RESULT STYLES ========== */
+    .api-result {
+      text-align: center;
+      padding: 2rem;
+      border-radius: var(--radius);
+      background: var(--background);
+      margin-top: 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .api-loading {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .loading-spinner {
+      border: 3px solid var(--border);
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .api-error {
+      text-align: center;
+      padding: 1.8rem;
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: var(--radius);
+      border-left: 4px solid var(--danger);
+    }
+
+    .api-success {
+      text-align: center;
+    }
+
+    /* ========== ANIMAL CARDS ========== */
+    .animal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .animal-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      border: 1px solid var(--border);
+    }
+
+    .animal-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .animal-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .animal-info {
+      padding: 1.5rem;
+    }
+
+    .animal-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .animal-details {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* ========== IMAGE CONTAINERS ========== */
+    .image-container {
+      display: flex;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+
+    .animal-image-display {
+      max-width: 100%;
+      max-height: 400px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* ========== FACT STYLES ========== */
+    .fact-container {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--primary);
+    }
+
+    .fact-text {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+
+    .fact-source {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      text-align: right;
+    }
+
+    /* ========== ANIMATIONS ========== */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ========== RESPONSIVE DESIGN ========== */
+    @media (max-width: 1024px) {
+      .app-container {
+        flex-direction: column;
+      }
+     
+      .sidebar {
+        width: 100%;
+        padding: 1.5rem;
+      }
+     
+      .nav-items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+     
+      .nav-item {
+        margin-bottom: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .top-bar {
+        padding: 1rem;
+      }
+     
+      .content-area {
+        padding: 1.5rem;
+      }
+     
+      .api-section {
+        padding: 1.5rem;
+      }
+     
+      .input-group {
+        flex-direction: column;
+      }
+     
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+     
+      .animal-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-item {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+      }
+     
+      .api-section {
+        padding: 1.2rem;
+      }
+     
+      .section-header h2 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-paw"></i>
+        </div>
+        <div class="logo-text">API Explorer</div>
+      </div>
+     
+      <div class="nav-section">
+        <div class="nav-title">Main</div>
+        <a href="#home" class="nav-item active" data-section="home">
+          <i class="fas fa-home"></i>
+          <span>Dashboard</span>
+        </a>
+      </div>
+     
+      <div class="nav-section">
+        <div class="nav-title">Animal APIs</div>
+        <a href="#cat" class="nav-item" data-section="cat">
+          <i class="fas fa-cat"></i>
+          <span>Cat API</span>
+        </a>
+        <a href="#dog" class="nav-item" data-section="dog">
+          <i class="fas fa-dog"></i>
+          <span>Dog API</span>
+        </a>
+        <a href="#catfacts" class="nav-item" data-section="catfacts">
+          <i class="fas fa-info-circle"></i>
+          <span>Cat Facts</span>
+        </a>
+        <a href="#dogfacts" class="nav-item" data-section="dogfacts">
+          <i class="fas fa-info-circle"></i>
+          <span>Dog Facts</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <div class="top-bar">
+        <div class="page-title">API Dashboard</div>
+        <div class="controls">
+          <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
+      </div>
+     
+      <div class="content-area">
+        <!-- Dashboard Section -->
+        <div id="home" class="api-section active">
+          <div class="section-header">
+            <span class="section-badge">Welcome</span>
+            <h2>Animal Data Hub</h2>
+            <p class="section-description">Explore and interact with various public APIs for animal-related data and information.</p>
+          </div>
+         
+          <div class="dashboard-grid">
+            <div class="dashboard-card" data-section="cat">
+              <div class="card-icon">
+                <i class="fas fa-cat"></i>
+              </div>
+              <h3>Cat API</h3>
+              <p>Discover cat breeds and get detailed information</p>
+              <span class="api-badge key-required">API Key Required</span>
+            </div>
+            <div class="dashboard-card" data-section="dog">
+              <div class="card-icon">
+                <i class="fas fa-dog"></i>
+              </div>
+              <h3>Dog API</h3>
+              <p>Browse dog breeds and get detailed information</p>
+              <span class="api-badge key-required">API Key Required</span>
+            </div>
+            <div class="dashboard-card" data-section="catfacts">
+              <div class="card-icon">
+                <i class="fas fa-info-circle"></i>
+              </div>
+              <h3>Cat Facts API</h3>
+              <p>Discover interesting facts about cats</p>
+              <span class="api-badge">No API Key</span>
+            </div>
+            <div class="dashboard-card" data-section="dogfacts">
+              <div class="card-icon">
+                <i class="fas fa-info-circle"></i>
+              </div>
+              <h3>Dog Facts API</h3>
+              <p>Get interesting facts about dogs</p>
+              <span class="api-badge">No API Key</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cat API Section -->
+        <div id="cat" class="api-section">
+          <div class="section-header">
+            <span class="section-badge">API Key Required</span>
+            <h2>Cat API</h2>
+            <p class="section-description">Discover cat breeds and get detailed information. Search for specific breeds to learn about their characteristics.</p>
+          </div>
+         
+          <div class="input-group">
+            <input type="text" id="catBreedInput" placeholder="Enter cat breed (e.g., Siamese, Maine Coon)">
+            <button id="catBtn" class="btn"><i class="fas fa-search"></i> Search Breed</button>
+          </div>
+         
+          <div id="catResult" class="api-result">
+            <div class="api-placeholder">
+              <div style="font-size: 4rem; margin-bottom: 1rem;">🐱</div>
+              <h3>Cat Breeds & Information</h3>
+              <p>Enter a cat breed above to get detailed information about it</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dog API Section -->
+        <div id="dog" class="api-section">
+          <div class="section-header">
+            <span class="section-badge">API Key Required</span>
+            <h2>Dog API</h2>
+            <p class="section-description">Browse dog breeds and get detailed information. Search for specific breeds to learn about their characteristics.</p>
+          </div>
+         
+          <div class="input-group">
+            <input type="text" id="breedInput" placeholder="Enter dog breed (e.g., Golden Retriever, Labrador)">
+            <button id="dogBtn" class="btn"><i class="fas fa-search"></i> Search Breed</button>
+          </div>
+         
+          <div id="dogResult" class="api-result">
+            <div class="api-placeholder">
+              <div style="font-size: 4rem; margin-bottom: 1rem;">🐕</div>
+              <h3>Dog Breeds & Information</h3>
+              <p>Enter a dog breed above to get detailed information about it</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cat Facts API Section -->
+        <div id="catfacts" class="api-section">
+          <div class="section-header">
+            <span class="section-badge">No API Key Required</span>
+            <h2>Cat Facts API</h2>
+            <p class="section-description">Discover interesting facts about cats. Learn about their behavior, biology, and unique characteristics.</p>
+          </div>
+         
+          <button id="catFactsBtn" class="btn"><i class="fas fa-sync-alt"></i> Get Cat Fact</button>
+         
+          <div id="catFactsResult" class="api-result">
+            <div class="api-placeholder">
+              <div style="font-size: 4rem; margin-bottom: 1rem;">🐱</div>
+              <h3>Cat Facts</h3>
+              <p>Click the button above to get an interesting fact about cats</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dog Facts API Section -->
+        <div id="dogfacts" class="api-section">
+          <div class="section-header">
+            <span class="section-badge">No API Key Required</span>
+            <h2>Dog Facts API</h2>
+            <p class="section-description">Get interesting facts about dogs. Learn about their behavior, biology, and unique characteristics.</p>
+          </div>
+         
+          <button id="dogFactsBtn" class="btn"><i class="fas fa-sync-alt"></i> Get Dog Fact</button>
+         
+          <div id="dogFactsResult" class="api-result">
+            <div class="api-placeholder">
+              <div style="font-size: 4rem; margin-bottom: 1rem;">🐕</div>
+              <h3>Dog Facts</h3>
+              <p>Click the button above to get an interesting fact about dogs</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme Toggle
+    document.getElementById('themeToggle').addEventListener('click', function() {
+      document.body.classList.toggle('dark-mode');
+      const icon = this.querySelector('i');
+      if (document.body.classList.contains('dark-mode')) {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+      } else {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+      }
+    });
+
+    // Navigation functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Navigation click handlers
+      document.querySelectorAll('.nav-item, .dashboard-card').forEach(element => {
+        element.addEventListener('click', function(e) {
+          e.preventDefault();
+          const sectionId = this.getAttribute('data-section') || this.getAttribute('href').substring(1);
+          showSection(sectionId);
+         
+          // Update active nav link
+          document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+          });
+         
+          const navItem = document.querySelector(`.nav-item[data-section="${sectionId}"]`);
+          if (navItem) {
+            navItem.classList.add('active');
+          }
+         
+          // Update page title
+          const pageTitle = document.querySelector('.page-title');
+          if (sectionId === 'home') {
+            pageTitle.textContent = 'API Dashboard';
+          } else {
+            const sectionName = document.querySelector(`#${sectionId} h2`).textContent;
+            pageTitle.textContent = sectionName;
+          }
+        });
+      });
+    });
+
+    function showSection(sectionId) {
+      // Hide all sections
+      document.querySelectorAll('.api-section').forEach(section => {
+        section.classList.remove('active');
+      });
+     
+      // Show selected section
+      document.getElementById(sectionId).classList.add('active');
+    }
+
+    // Cat API functionality
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("catBtn");
+      const result = document.getElementById("catResult");
+      const breedInput = document.getElementById("catBreedInput");
+
+      // Add enter key support
+      if (breedInput) {
+        breedInput.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            btn.click();
+          }
+        });
+      }
+
+      if (btn) {
+        btn.addEventListener("click", () => {
+          const breed = breedInput.value.trim();
+         
+          if (!breed) {
+            showCatError("⚠️ Please enter a cat breed.");
+            return;
+          }
+
+          showCatLoading();
+         
+          // Use the real Cat API
+          showCatData(breed);
+        });
+      }
+
+      function showCatLoading() {
+        result.innerHTML = `
+          <div class="api-loading">
+            <div class="loading-spinner"></div>
+            <p>Searching for information about ${breedInput.value}...</p>
+          </div>
+        `;
+      }
+
+      function showCatError(message) {
+        result.innerHTML = `
+          <div class="api-error">
+            <p>${message}</p>
+          </div>
+        `;
+      }
+
+      function showCatData(breed) {
+        const apiKey = "live_amtzOZeTOqedRtXh43f2NH7lgsZFxfhul5ITxOPUjQFzRwIWr69bIyl";
+       
+        // First, search for the breed to get breed ID
+        fetch(`https://api.thecatapi.com/v1/breeds/search?q=${encodeURIComponent(breed)}`, {
+          headers: {
+            'x-api-key': apiKey
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Breed not found or API error');
+          }
+          return response.json();
+        })
+        .then(breeds => {
+          if (breeds.length === 0) {
+            throw new Error(`Breed "${breed}" not found. Try: Siamese, Maine Coon, Persian, Ragdoll, Bengal, etc.`);
+          }
+         
+          const breedData = breeds[0];
+         
+          // Now get a random image for this breed
+          return fetch(`https://api.thecatapi.com/v1/images/search?breed_ids=${breedData.id}`, {
+            headers: {
+              'x-api-key': apiKey
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Could not fetch image');
+            }
+            return response.json();
+          })
+          .then(images => {
+            const imageUrl = images.length > 0 ? images[0].url : null;
+           
+            // Display the breed information
+            result.innerHTML = `
+              <div class="api-success">
+                <h3>${breedData.name}</h3>
+                ${imageUrl ? `
+                  <div class="image-container">
+                    <img src="${imageUrl}" alt="${breedData.name}" class="animal-image-display">
+                  </div>
+                ` : ''}
+                <div style="margin-top: 1.5rem; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                  ${breedData.temperament ? `<p><strong>Temperament:</strong> ${breedData.temperament}</p>` : ''}
+                  ${breedData.life_span ? `<p><strong>Life Span:</strong> ${breedData.life_span} years</p>` : ''}
+                  ${breedData.origin ? `<p><strong>Origin:</strong> ${breedData.origin}</p>` : ''}
+                  ${breedData.description ? `<p><strong>Description:</strong> ${breedData.description}</p>` : ''}
+                  ${breedData.weight && breedData.weight.metric ? `<p><strong>Weight:</strong> ${breedData.weight.metric} kg</p>` : ''}
+                  ${breedData.alt_names ? `<p><strong>Alternative Names:</strong> ${breedData.alt_names}</p>` : ''}
+                  ${breedData.wikipedia_url ? `<p><strong>Learn More:</strong> <a href="${breedData.wikipedia_url}" target="_blank" style="color: var(--primary);">Wikipedia</a></p>` : ''}
+                </div>
+                <div style="margin-top: 1.5rem; color: var(--text-secondary);">
+                  <small>Data provided by The Cat API</small>
+                </div>
+              </div>
+            `;
+          });
+        })
+        .catch(error => {
+          console.error('Cat API Error:', error);
+          result.innerHTML = `
+            <div class="api-error">
+              <p>${error.message}</p>
+              <p style="margin-top: 1rem;">Try searching for: Siamese, Maine Coon, Persian, Ragdoll, Bengal, British Shorthair, Sphynx</p>
+            </div>
+          `;
+        });
+      }
+    });
+
+    // Dog API functionality
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("dogBtn");
+      const result = document.getElementById("dogResult");
+      const breedInput = document.getElementById("breedInput");
+
+      // Add enter key support
+      if (breedInput) {
+        breedInput.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            btn.click();
+          }
+        });
+      }
+
+      if (btn) {
+        btn.addEventListener("click", () => {
+          const breed = breedInput.value.trim();
+         
+          if (!breed) {
+            showDogError("⚠️ Please enter a dog breed.");
+            return;
+          }
+
+          showDogLoading();
+         
+          // Use the real Dog API
+          showDogData(breed);
+        });
+      }
+
+      function showDogLoading() {
+        result.innerHTML = `
+          <div class="api-loading">
+            <div class="loading-spinner"></div>
+            <p>Searching for information about ${breedInput.value}...</p>
+          </div>
+        `;
+      }
+
+      function showDogError(message) {
+        result.innerHTML = `
+          <div class="api-error">
+            <p>${message}</p>
+          </div>
+        `;
+      }
+
+      function showDogData(breed) {
+        const apiKey = "live_BANCaxuQaB3tAwggy5Eg2sgu8F7syHiAYwH0IkbwtceBJMxIocpSGrtle7Mi6QCA";
+       
+        // First, search for the breed to get breed ID
+        fetch(`https://api.thedogapi.com/v1/breeds/search?q=${encodeURIComponent(breed)}`, {
+          headers: {
+            'x-api-key': apiKey
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Breed not found or API error');
+          }
+          return response.json();
+        })
+        .then(breeds => {
+          if (breeds.length === 0) {
+            throw new Error(`Breed "${breed}" not found. Try: Golden Retriever, German Shepherd, French Bulldog, etc.`);
+          }
+         
+          const breedData = breeds[0];
+         
+          // Now get a random image for this breed
+          return fetch(`https://api.thedogapi.com/v1/images/search?breed_id=${breedData.id}`, {
+            headers: {
+              'x-api-key': apiKey
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Could not fetch image');
+            }
+            return response.json();
+          })
+          .then(images => {
+            const imageUrl = images.length > 0 ? images[0].url : null;
+           
+            // Display the breed information
+            result.innerHTML = `
+              <div class="api-success">
+                <h3>${breedData.name}</h3>
+                ${imageUrl ? `
+                  <div class="image-container">
+                    <img src="${imageUrl}" alt="${breedData.name}" class="animal-image-display">
+                  </div>
+                ` : ''}
+                <div style="margin-top: 1.5rem; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                  ${breedData.temperament ? `<p><strong>Temperament:</strong> ${breedData.temperament}</p>` : ''}
+                  ${breedData.life_span ? `<p><strong>Life Span:</strong> ${breedData.life_span}</p>` : ''}
+                  ${breedData.origin ? `<p><strong>Origin:</strong> ${breedData.origin}</p>` : ''}
+                  ${breedData.bred_for ? `<p><strong>Bred For:</strong> ${breedData.bred_for}</p>` : ''}
+                  ${breedData.breed_group ? `<p><strong>Breed Group:</strong> ${breedData.breed_group}</p>` : ''}
+                  ${breedData.weight && breedData.weight.metric ? `<p><strong>Weight:</strong> ${breedData.weight.metric} kg</p>` : ''}
+                  ${breedData.height && breedData.height.metric ? `<p><strong>Height:</strong> ${breedData.height.metric} cm</p>` : ''}
+                </div>
+                <div style="margin-top: 1.5rem; color: var(--text-secondary);">
+                  <small>Data provided by The Dog API</small>
+                </div>
+              </div>
+            `;
+          });
+        })
+        .catch(error => {
+          console.error('Dog API Error:', error);
+          result.innerHTML = `
+            <div class="api-error">
+              <p>${error.message}</p>
+              <p style="margin-top: 1rem;">Try searching for: Golden Retriever, German Shepherd, French Bulldog, Siberian Husky, Labrador Retriever, Bulldog</p>
+            </div>
+          `;
+        });
+      }
+    });
+
+    // Cat Facts API functionality
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("catFactsBtn");
+      const result = document.getElementById("catFactsResult");
+
+      if (btn) {
+        btn.addEventListener("click", () => {
+          showCatFactsLoading();
+         
+          // Use the Cat Facts API
+          fetchCatFacts();
+        });
+      }
+
+      function showCatFactsLoading() {
+        result.innerHTML = `
+          <div class="api-loading">
+            <div class="loading-spinner"></div>
+            <p>Fetching an interesting cat fact...</p>
+          </div>
+        `;
+      }
+
+      function fetchCatFacts() {
+        // Use the Cat Facts API
+        fetch("https://catfact.ninja/fact")
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch cat fact');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data && data.fact) {
+              result.innerHTML = `
+                <div class="api-success">
+                  <div style="font-size: 4rem; margin-bottom: 1rem;">🐱</div>
+                  <div class="fact-container">
+                    <div class="fact-text">${data.fact}</div>
+                    <div class="fact-source">Source: Cat Facts API</div>
+                  </div>
+                  <div style="margin-top: 1.5rem;">
+                    <button class="btn" onclick="document.getElementById('catFactsBtn').click()">
+                      <i class="fas fa-sync-alt"></i> Get Another Fact
+                    </button>
+                  </div>
+                </div>
+              `;
+            } else {
+              throw new Error('Invalid response from Cat Facts API');
+            }
+          })
+          .catch(error => {
+            console.error('Cat Facts API Error:', error);
+            // Fallback to demo data if API fails
+            showCatFactsDemoData();
+          });
+      }
+
+      function showCatFactsDemoData() {
+        const catFacts = [
+          "Cats have five toes on their front paws, but only four on their back paws.",
+          "A group of cats is called a clowder.",
+          "Cats can rotate their ears 180 degrees.",
+          "The world's oldest cat lived to be 38 years old!",
+          "Cats spend approximately 70% of their lives sleeping.",
+          "A cat's nose print is unique, much like a human's fingerprint.",
+          "Cats have a special reflective layer in their eyes called the tapetum lucidum, which helps them see in low light.",
+          "The average cat can jump up to six times its body length in a single bound.",
+          "Cats have 32 muscles in each ear, compared to humans' 6.",
+          "A cat's purr vibrates at a frequency of 25 to 150 Hertz, which can promote healing of bones and tissues."
+        ];
+       
+        const randomFact = catFacts[Math.floor(Math.random() * catFacts.length)];
+       
+        result.innerHTML = `
+          <div class="api-success">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🐱</div>
+            <div class="fact-container">
+              <div class="fact-text">${randomFact}</div>
+              <div class="fact-source">Source: Cat Facts Database</div>
+            </div>
+            <div style="margin-top: 1.5rem;">
+              <button class="btn" onclick="document.getElementById('catFactsBtn').click()">
+                <i class="fas fa-sync-alt"></i> Get Another Fact
+              </button>
+            </div>
+            <div style="margin-top: 1.5rem; color: var(--text-secondary);">
+              <small>Note: This is demo data. The Cat Facts API was temporarily unavailable.</small>
+            </div>
+          </div>
+        `;
+      }
+    });
+
+    // Dog Facts API functionality
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("dogFactsBtn");
+      const result = document.getElementById("dogFactsResult");
+
+      if (btn) {
+        btn.addEventListener("click", () => {
+          showDogFactsLoading();
+         
+          // Use the Dog Facts API
+          fetchDogFacts();
+        });
+      }
+
+      function showDogFactsLoading() {
+        result.innerHTML = `
+          <div class="api-loading">
+            <div class="loading-spinner"></div>
+            <p>Fetching an interesting dog fact...</p>
+          </div>
+        `;
+      }
+
+      function fetchDogFacts() {
+        // Use a more reliable Dog Facts API
+        fetch("https://dogapi.dog/api/v2/facts")
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch dog fact');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data && data.data && data.data.length > 0 && data.data[0].attributes && data.data[0].attributes.body) {
+              const fact = data.data[0].attributes.body;
+              result.innerHTML = `
+                <div class="api-success">
+                  <div style="font-size: 4rem; margin-bottom: 1rem;">🐕</div>
+                  <div class="fact-container">
+                    <div class="fact-text">${fact}</div>
+                    <div class="fact-source">Source: Dog API</div>
+                  </div>
+                  <div style="margin-top: 1.5rem;">
+                    <button class="btn" onclick="document.getElementById('dogFactsBtn').click()">
+                      <i class="fas fa-sync-alt"></i> Get Another Fact
+                    </button>
+                  </div>
+                </div>
+              `;
+            } else {
+              throw new Error('Invalid response from Dog Facts API');
+            }
+          })
+          .catch(error => {
+            console.error('Dog Facts API Error:', error);
+            // Try alternative API
+            fetchAlternativeDogFacts();
+          });
+      }
+
+      function fetchAlternativeDogFacts() {
+        // Alternative Dog Facts API
+        fetch("https://dog-api.kinduff.com/api/facts")
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch dog fact');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data && data.facts && data.facts.length > 0) {
+              const fact = data.facts[0];
+              result.innerHTML = `
+                <div class="api-success">
+                  <div style="font-size: 4rem; margin-bottom: 1rem;">🐕</div>
+                  <div class="fact-container">
+                    <div class="fact-text">${fact}</div>
+                    <div class="fact-source">Source: Dog Facts API</div>
+                  </div>
+                  <div style="margin-top: 1.5rem;">
+                    <button class="btn" onclick="document.getElementById('dogFactsBtn').click()">
+                      <i class="fas fa-sync-alt"></i> Get Another Fact
+                    </button>
+                  </div>
+                </div>
+              `;
+            } else {
+              throw new Error('Invalid response from Dog Facts API');
+            }
+          })
+          .catch(error => {
+            console.error('Alternative Dog Facts API Error:', error);
+            // Fallback to demo data if both APIs fail
+            showDogFactsDemoData();
+          });
+      }
+
+      function showDogFactsDemoData() {
+        const dogFacts = [
+          "Dogs have a sense of smell that is at least 40 times better than humans.",
+          "A dog's nose print is unique, much like a human's fingerprint.",
+          "The Basenji is the only breed of dog that can't bark, but they can yodel.",
+          "Dogs have three eyelids: an upper lid, a lower lid, and a third lid called a nictitating membrane.",
+          "The world's oldest known breed is the Saluki, dating back to 329 BC.",
+          "Dogs can understand up to 250 words and gestures.",
+          "A dog's sense of hearing is more than ten times more acute than a human's.",
+          "The Newfoundland breed has webbed feet and is an excellent swimmer.",
+          "Dogs have about 1,700 taste buds, while humans have about 9,000.",
+          "The average dog can run about 19 miles per hour, but greyhounds can reach speeds of 45 miles per hour."
+        ];
+       
+        const randomFact = dogFacts[Math.floor(Math.random() * dogFacts.length)];
+       
+        result.innerHTML = `
+          <div class="api-success">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🐕</div>
+            <div class="fact-container">
+              <div class="fact-text">${randomFact}</div>
+              <div class="fact-source">Source: Dog Facts Database</div>
+            </div>
+            <div style="margin-top: 1.5rem;">
+              <button class="btn" onclick="document.getElementById('dogFactsBtn').click()">
+                <i class="fas fa-sync-alt"></i> Get Another Fact
+              </button>
+            </div>
+            <div style="margin-top: 1.5rem; color: var(--text-secondary);">
+              <small>Note: This is demo data. The Dog Facts APIs were temporarily unavailable.</small>
+            </div>
+          </div>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>
